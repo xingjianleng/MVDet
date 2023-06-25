@@ -3,7 +3,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import kornia
+from kornia.geometry.transform import warp_perspective
 from torchvision.models.alexnet import alexnet
 from torchvision.models.vgg import vgg11
 from torchvision.models.mobilenet import mobilenet_v2
@@ -66,7 +66,7 @@ class ImageProjVariant(nn.Module):
             imgs_result.append(img_res)
             img_res = F.interpolate(imgs[:, cam].to('cuda:0'), self.upsample_shape, mode='bilinear')
             proj_mat = self.proj_mats[cam].repeat([B, 1, 1]).float().to('cuda:0')
-            img_feature = kornia.warp_perspective(img_res, proj_mat, self.reducedgrid_shape)
+            img_feature = warp_perspective(img_res, proj_mat, self.reducedgrid_shape)
             if visualize:
                 projected_image_rgb = img_feature[0, :].detach().cpu().numpy().transpose([1, 2, 0])
                 projected_image_rgb = Image.fromarray((projected_image_rgb * 255).astype('uint8'))
